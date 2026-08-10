@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Ignorierte folder and system files
+data/
+vid/
+docs/
+*.DS_Store
+.DS_Store
