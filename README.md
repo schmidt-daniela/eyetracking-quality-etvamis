@@ -6,7 +6,7 @@ This repository contains the R analyses for reviewing eye-tracking data quality 
 
 ## 📌 Background & Motivation
 
-Specifically, this repository compares the eye-tracking data quality of an individual's own 2-point calibration against a 5-point calibration obtained from a same-species conspecific (or in few cases, an individual’s own 5-point calibration). This comparison was conducted because Schmidt et al. (in prep.) ([Link to Preregistration](https://osf.io/u3p8d/overview)) found that using a 5-point calibration from a conspecific yields substantially better accuracy than using an individual's own 2-point calibration. 
+Specifically, this repository compares the eye-tracking data quality when using an individual's own 2-point calibration versus a 5-point calibration obtained from a same-species conspecific (or in few cases, an individual’s own 5-point calibration). This comparison was conducted because Schmidt et al. (in prep.) ([Link to Preregistration](https://osf.io/u3p8d/overview)) found that using a 5-point calibration from a conspecific yields substantially better accuracy than using an individual's own 2-point calibration. 
 
 The R scripts uploaded in this repository evaluate the eye-tracking data quality of the conspecifics (or in few cases own) 5-point calibrations. The baseline 2-point calibration values used for comparison were obtained from previous data collections by our research group.
 
