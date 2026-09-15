@@ -1,0 +1,10 @@
+individual	n_trials
+Amira	16
+Gerda	13
+Hodari	12
+Jasongo	16
+Kuno	13
+Lexi	18
+Luiza	12
+Tayo	11
+Yaro	16
