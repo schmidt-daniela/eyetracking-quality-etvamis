@@ -1,7 +1,0 @@
-individual	n_trials
-Dokana	19
-Lursa	14
-Padana	20
-Pini	18
-Raja	7
-Sari	18

@@ -1,7 +1,0 @@
-individual	n_trials
-Alex	9
-Daza	10
-Frederike	9
-Hope	10
-Jeudi	7
-Zira	9
