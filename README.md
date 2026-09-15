@@ -42,14 +42,22 @@ Once downloaded, place the raw `.tsv` files into the `data/` directory matching 
 ```text
 et_vamis/
 ├── data/                    # (Must be created locally / downloaded from OSF)
-│   ├── bchimps/
-│   │   └── main_data.tsv
-│   ├── bonobos2/
-│   │   └── main_data.tsv
-│   └── orangs/
-│       └── main_data.tsv
+│   ├── data_apes_5popflakes/
+│   │   └── b_chimps
+│   │   └── bonobos
+│   │   └── bonobos2
+│   │   └── orangs
+│   ├── data_apes_7popflakes/
+│   │   └── bonobos
+│   │   └── orangs
+│   └── sumdata_apes_5popflakes/
+│   │   └── b_chimps
+│   │   └── bonobos
+│   │   └── bonobos2
+│   │   └── orangs
 ├── img/                     # Plot outputs and generated images
 ├── R/                       # Helper R scripts and functions
 ├── et_vamis_popflakes.Rproj
-├── popflake_analysis.R
+├── apes_5popflakes_dataquality.R # Popflakes presented at 5 positions before data collection
+├── apes_7popflakes_dataquality.R # Popflakes presented at the 7 AOI positions during data collection
 └── README.md
