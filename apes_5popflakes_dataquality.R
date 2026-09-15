@@ -13,15 +13,6 @@ source(here("R", "eyetracking_data_quality.R"))
 source(here("R", "eyetracking_outcomes.R"))
 source(here("R", "utils.R"))
 
-# For plotting
-mean_ci <- function(x) {
-  n  <- sum(!is.na(x))
-  m  <- mean(x, na.rm = TRUE)
-  se <- sd(x, na.rm = TRUE) / sqrt(n)
-  ci <- se * qt(0.975, df = n - 1)
-  data.frame(y = m, ymin = m - ci, ymax = m + ci)
-}
-
 # For creating dataframe with descriptives
 calc_dq <- function(df, val_col, dq_label) {
   df |> 
@@ -38,7 +29,7 @@ calc_dq <- function(df, val_col, dq_label) {
 
 # Set Parameters ----------------------------------------------------------
 buffer <- 120
-species <- "orangs" # "bonobos" or "orangs" or "bonobos2" or "b_chimps"
+species <- "b_chimps" # "bonobos" or "orangs" or "bonobos2" or "b_chimps"
 plot_color <- switch(species,
                      "orangs"   = "#E69F00",
                      "bonobos"  = "#A01C99",
@@ -47,7 +38,7 @@ plot_color <- switch(species,
                      "a_chimps"  = "#F0E442",
                      "#999999"  # "fallback-color, if species cannot be found
 )
-data_path <- here("data", species)
+data_path <- here("data", "data_apes_5popflakes", species)
 files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # get file names
 species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
 
@@ -79,7 +70,7 @@ centralflake_x_botright <- 1060 + buffer
 centralflake_y_botright <- 640 + buffer
 
 # Read Data ---------------------------------------------------------------
-raw <- read.table(here("data", species, "main_data.tsv"), header = TRUE, sep = "\t")
+raw <- read.table(here("data", "data_apes_5popflakes", species, "main_data.tsv"), header = TRUE, sep = "\t")
 df <- raw
 
 # Correct Naming Mistake --------------------------------------------------
@@ -1166,14 +1157,14 @@ dq_overall <- dq_2p |>
   bind_rows(dq_5p)
 
 # Save summed up data
-write.table(dq_overall, here("sum_data", species, "dq_overall.txt"), sep = "\t",
+write.table(dq_overall, here("data", "sumdata_apes_5popflakes", species, "dq_overall.txt"), sep = "\t",
   row.names = FALSE, quote = FALSE)
 
 # Valid Trials ----
 acc_trials <- df_acc_tot |>
   mutate(individual = str_extract(recording_name, "(?<=CalibrationCheck_)[A-Za-z]+")) |>
   count(individual, name = "n_trials")
-write.table(acc_trials, here("sum_data", species, "acc_trials.txt"), sep = "\t",
+write.table(acc_trials, here("data", "sumdata_apes_5popflakes", species, "acc_trials.txt"), sep = "\t",
             row.names = FALSE, quote = FALSE)
 
 precrms_trials <- df_precrms_tot |>
@@ -1181,7 +1172,7 @@ precrms_trials <- df_precrms_tot |>
   select(individual, session_trial) |>
   distinct() |>
   count(individual, name = "n_trials")
-write.table(precrms_trials, here("sum_data", species, "precrms_trials.txt"), sep = "\t",
+write.table(precrms_trials, here("data", "sumdata_apes_5popflakes", species, "precrms_trials.txt"), sep = "\t",
             row.names = FALSE, quote = FALSE)
 
 precsd_trials <- df_precsd_tot |>
@@ -1189,7 +1180,7 @@ precsd_trials <- df_precsd_tot |>
   select(individual, session_trial) |>
   distinct() |>
   count(individual, name = "n_trials")
-write.table(precsd_trials, here("sum_data", species, "precsd_trials.txt"), sep = "\t",
+write.table(precsd_trials, here("data", "sumdata_apes_5popflakes", species, "precsd_trials.txt"), sep = "\t",
             row.names = FALSE, quote = FALSE)
 
 # Presented Trials ----
