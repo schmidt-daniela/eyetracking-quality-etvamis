@@ -13,18 +13,40 @@ source(here("R", "eyetracking_data_quality.R"))
 source(here("R", "eyetracking_outcomes.R"))
 source(here("R", "utils.R"))
 
+# For plotting
+mean_ci <- function(x) {
+  n  <- sum(!is.na(x))
+  m  <- mean(x, na.rm = TRUE)
+  se <- sd(x, na.rm = TRUE) / sqrt(n)
+  ci <- se * qt(0.975, df = n - 1)
+  data.frame(y = m, ymin = m - ci, ymax = m + ci)
+}
+
+# For creating dataframe with descriptives
+calc_dq <- function(df, val_col, dq_label) {
+  df |> 
+    group_by(species) |> 
+    summarise(
+      mean  = mean({{ val_col }}, na.rm = TRUE),
+      sd    = sd({{ val_col }}, na.rm = TRUE),
+      lower = mean - (sd / sqrt(n())) * qt(0.975, df = n() - 1),
+      upper = mean + (sd / sqrt(n())) * qt(0.975, df = n() - 1),
+      dq    = dq_label,
+      .groups = "drop"
+    )
+}
+
 # Set Parameters ----------------------------------------------------------
 buffer <- 120
-species <- "bchimps" # "bonobos" or "orangs" or "bonobos2" or "bchimps"
+species <- "orangs" # "bonobos" or "orangs" or "bonobos2" or "b_chimps"
 plot_color <- switch(species,
                      "orangs"   = "#E69F00",
                      "bonobos"  = "#A01C99",
                      "bonobos2" = "#56B4E9",
-                     "bchimps"  = "#009E73",
-                     "achimps"  = "#F0E442",
+                     "b_chimps"  = "#009E73",
+                     "a_chimps"  = "#F0E442",
                      "#999999"  # "fallback-color, if species cannot be found
 )
-ifelse(species == "bonobos", robustness_time <- 58948, robustness_time <- 58626)
 data_path <- here("data", species)
 files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # get file names
 species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
@@ -66,7 +88,7 @@ df <- df  |>
 
 df <- df |>
   mutate(
-    Recording.name = if (species == "bchimps") {
+    Recording.name = if (species == "b_chimps") {
       case_match(
         Recording.name, # rename recording names to make it consistent with bonobos and orangs
         "Alex"      ~ "CalibrationCheck_Alex_M_Session1",
@@ -78,7 +100,7 @@ df <- df |>
         .default    = Recording.name # if there are other names, they won't change
       )
     } else {
-      Recording.name # don't do anything, if species is not bchimps
+      Recording.name # don't do anything, if species is not b_chimps
     }
   )
 
@@ -91,7 +113,7 @@ df <- df |>
                 str_remove("_+$") |>  # remove one or more _ at the end of a string
                 str_to_lower()) # make all letters lowercase
 
-# Add Gaze-Sample Durations
+# Add Gaze-Sample Duration
 df$recording_timestamp <- as.numeric(df$recording_timestamp)
 df$gaze_sample_duration <- c(diff(df$recording_timestamp), NA) / 1000
 
@@ -129,7 +151,7 @@ if(species == "bonobos2"){
 df <- df |>
   unite(position, position_y, position_x, sep = "_", remove = FALSE)
 
-# Add Cumulative Duration Per Trial
+# Add cumulative duration per trial
 df <- df |> 
   group_by(recording_name, session_trial, duration) |> 
   mutate(timeline_trial_units = cumsum(gaze_sample_duration)) |> 
@@ -329,7 +351,7 @@ df_acc_poptopleft <- calculate_accuracy(
   stimulus_vec = "checkflake",
   media_col = "stimulus",
   gaze_event_col = "eye_movement_type",
-  id_col = "name",
+  id_col = "recording_name",
   gaze_event_index_col = "eye_movement_type_index",
   x_fix = "fixation_point_x",
   y_fix = "fixation_point_y",
@@ -353,7 +375,7 @@ df_acc_poptopright <- calculate_accuracy(
   stimulus_vec = "checkflake",
   media_col = "stimulus",
   gaze_event_col = "eye_movement_type",
-  id_col = "name",
+  id_col = "recording_name",
   gaze_event_index_col = "eye_movement_type_index",
   x_fix = "fixation_point_x",
   y_fix = "fixation_point_y",
@@ -377,7 +399,7 @@ df_acc_popbotleft <- calculate_accuracy(
   stimulus_vec = "checkflake",
   media_col = "stimulus",
   gaze_event_col = "eye_movement_type",
-  id_col = "name",
+  id_col = "recording_name",
   gaze_event_index_col = "eye_movement_type_index",
   x_fix = "fixation_point_x",
   y_fix = "fixation_point_y",
@@ -401,7 +423,7 @@ df_acc_popbotright <- calculate_accuracy(
   stimulus_vec = "checkflake",
   media_col = "stimulus",
   gaze_event_col = "eye_movement_type",
-  id_col = "name",
+  id_col = "recording_name",
   gaze_event_index_col = "eye_movement_type_index",
   x_fix = "fixation_point_x",
   y_fix = "fixation_point_y",
@@ -425,7 +447,7 @@ df_acc_popcenter <- calculate_accuracy(
   stimulus_vec = "checkflake",
   media_col = "stimulus",
   gaze_event_col = "eye_movement_type",
-  id_col = "name",
+  id_col = "recording_name",
   gaze_event_index_col = "eye_movement_type_index",
   x_fix = "fixation_point_x",
   y_fix = "fixation_point_y",
@@ -450,27 +472,73 @@ df_acc_tot <- df_acc_poptopleft |>
   mutate(data_quality = "accuracy")
 
 # Plot Accuracy ----
-df_plot <- df_acc_tot |>
-  mutate(individual = df_acc_tot$name)
-
-df_overall <- df_plot |>
-  group_by(individual) |>
+df_plot_acc <- df_acc_tot |>
+  separate(recording_name, into = c("experiment_unit", "name", "sex", "session"), sep = "_") |>
+  separate(session_trial, into = c("session", "trial"), sep = "_") |> 
+  mutate(name = str_to_lower(name)) |> 
+  group_by(name) |> 
   summarise(
     acc_visd = mean(acc_visd, na.rm = TRUE),
     .groups = "drop"
   )
 
-p_overall_style <- ggplot(df_overall, aes(x = species, y = acc_visd)) +
-  # geom_violin(
-  #   trim = FALSE,
-  #   fill = NA,
-  #   color = "black",
-  #   linewidth = 0.8
-  # ) +
+if(species %in% c("a_chimps", "b_chimps")){
+  ref_mean <- 4.11
+  ref_sd   <- 0.83
+  ref_n    <- 17
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Chimps_FACET"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if(species %in% c("orangs")){
+  ref_mean <- 3.36
+  ref_sd   <- 1.19
+  ref_n    <- 6
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Orangs_REJOINTComp"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if(species %in% c("bonobos", "bonobos2")){
+  ref_mean <- 3.15
+  ref_sd   <- 1.01
+  ref_n    <- 9
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Bonobos_REJOINTComp"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+df_plot_acc <- df_plot_acc |>
+  mutate(species = paste0("5P_", str_to_title(.env$species), "_ETVamis"))
+
+ggplot_acc <- ggplot(df_plot_acc, aes(x = species, y = acc_visd)) +
   geom_jitter(
     width = 0.04,
     height = 0,
-    size = 2.8,
+    size = 1.5,
     alpha = 0.9,
     color = plot_color,
   ) +
@@ -487,11 +555,24 @@ p_overall_style <- ggplot(df_overall, aes(x = species, y = acc_visd)) +
     linewidth = 0.8,
     color = "black"
   ) +
+  geom_point( # manual value from prior 2-point calibration studies
+    data = df_ref,
+    aes(x = species, y = mean),
+    size = 3.2,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  geom_errorbar(
+    data = df_ref,
+    aes(x = species, y = mean, ymin = lower, ymax = upper),
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
   scale_y_continuous(
     breaks = c(0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0),
     limits = c(0, 7)
-    # breaks = c(0, 2, 4, 6),
-    # limits = c(0, 7)
   ) +
   labs(
     x = NULL,
@@ -506,42 +587,616 @@ p_overall_style <- ggplot(df_overall, aes(x = species, y = acc_visd)) +
   )
 
 png(here("img", paste0(species, "_acc_paperplot.png")), width = 2480/2, height = 3508/4, res = 100)
-p_overall_style
+ggplot_acc
 dev.off()
 
-df_acc_tot |> 
-  group_by(name) |> 
-  summarize(mean_acc_visd = mean(acc_visd, na.rm = T), sd_acc_visd = sd(acc_visd, na.rm = T)) |> 
-  ungroup()
+print(paste0("ACCURACY. Mean: ", df_plot_acc |> summarize(M = round(mean(acc_visd, na.rm = T),2)),
+             "; SD: ", df_plot_acc |> summarize(M = round(sd(acc_visd, na.rm = T),2)), ". ",
+             "(", species_label, ")"))
 
-if(species %in% c("orangs", "bonobos")){
-  df_acc_tot |> 
-    separate(session_trial, into = c("session", "trial"), sep = "_") |> 
-    group_by(name, session) |> 
-    summarize(mean_acc_visd = mean(acc_visd, na.rm = TRUE), .groups = "drop") |> 
-    pivot_wider(names_from = session, values_from = mean_acc_visd) |> 
-    mutate(diff_s2_s1 = session2 - session1)
+dq_2p <- df_ref |> 
+  mutate(dq = "accuracy") |> 
+  mutate(n = df_plot_acc |> nrow())
+
+# Precision (RMS) ----
+df_preproc_temp_precisionrms <- df
+
+param_precrms <- data.frame(
+  position = c(
+    "top_left",
+    "bot_left",
+    "top_right",
+    "bot_right",
+    "center_center"
+  ),
+  xmin = c(380 - buffer, 380 - buffer, 1340 - buffer, 1340 - buffer, 860 -
+             buffer),
+  xmax = c(580 + buffer, 580 + buffer, 1540 + buffer, 1540 + buffer, 1060 +
+             buffer),
+  ymin = c(170 - buffer, 710 - buffer, 170 - buffer, 710 - buffer, 440 -
+             buffer),
+  ymax = c(370 + buffer, 910 + buffer, 370 + buffer, 910 + buffer, 640 +
+             buffer),
+  df_name = c(
+    "df_precrms_poptopleft",
+    "df_precrms_popbotleft",
+    "df_precrms_poptopright",
+    "df_precrms_popbotright",
+    "df_precrms_popcenter"
+  )
+)
+
+for (j in c(1:5)) {
+  df_precrms_temp <- calculate_precision_rms(
+    df_preproc_temp_precisionrms |> filter(stimulus == "checkflake" &
+                                             position == param_precrms$position[j]),
+    media_col = "stimulus",
+    gaze_event_col = "eye_movement_type",
+    id_col = "recording_name",
+    stimulus_vec = "checkflake",
+    gaze_event_index_col = "eye_movement_type_index",
+    gaze_event_dur_col = "gaze_event_duration_revised",
+    x_fix = "fixation_point_x",
+    y_fix = "fixation_point_y",
+    x = "gaze_point_x",
+    y = "gaze_point_y",
+    trial = "session_trial",
+    screen_height_min = 0 - buffer,
+    screen_width_min = 0 - buffer,
+    screen_height_max = 1080 + buffer,
+    screen_width_max = 1920 + buffer,
+    aoi_buffer_px_x = 0,
+    aoi_buffer_px_y = 0,
+    xmin = param_precrms$xmin[j],
+    xmax = param_precrms$xmax[j],
+    ymin = param_precrms$ymin[j],
+    ymax = param_precrms$ymax[j],
+    off_exclude = TRUE,
+    longest_fix_only = FALSE,
+    AOI_only = FALSE
+  ) |>
+    mutate(precrms_visd = precrms * onepx_in_visd(60, 92)) |>
+    left_join(
+      df_preproc_temp_precisionrms |> select(stimulus, position, session_trial) |> distinct(),
+      by = "session_trial"
+    ) |>
+    drop_na(precrms_visd)
+  
+  assign(param_precrms$df_name[j], df_precrms_temp)
+  rm(df_precrms_temp)
 }
 
-# Distance to screen
-df |>
-  mutate(across(eye_position_left_z_dacsmm,
-                ~ as.numeric(gsub(",", ".", .x)))) |>
-  summarise(mean_z = mean(eye_position_left_z_dacsmm, na.rm = TRUE) / 10,
-            .by = name)
+df_precrms_tot <- df_precrms_poptopleft |>
+  bind_rows(
+    df_precrms_popbotleft,
+    df_precrms_poptopright,
+    df_precrms_popbotright,
+    df_precrms_popcenter
+  ) |>
+  mutate(data_quality = "precisionrms") |>
+  drop_na(precrms_visd)
 
-# Valid trials
-df_acc_tot |> 
-  select(name, stimulus, position, acc_visd) |> 
+rm(df_precrms_popbotleft, df_precrms_popbotright, df_precrms_popcenter, df_precrms_poptopleft,
+  df_precrms_poptopright, df_preproc_temp_precisionrms)
+
+# Plot Precision (RMS) ----
+df_plot_precrms <- df_precrms_tot |>
+  separate(recording_name, into = c("experiment_unit", "name", "sex", "session"), sep = "_") |>
+  separate(session_trial, into = c("session", "trial"), sep = "_") |> 
+  mutate(name = str_to_lower(name)) |> 
+  group_by(name, session, trial) |> 
+  summarise(
+    precrms_visd = mean(precrms_visd, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
   group_by(name) |> 
-  count() |> 
-  ungroup()
+  summarise(
+    precrms_visd = mean(precrms_visd, na.rm = TRUE),
+    .groups = "drop"
+  )
 
-# Presented trials
-df |> 
-  select(recording_name, session_trial, stimulus, position) |> 
-  mutate(recording_name = tolower(recording_name)) |> 
-  distinct() |> 
-  group_by(recording_name) |> 
-  count() |> 
-  ungroup()
+if(species %in% c("a_chimps", "b_chimps")){
+  ref_mean <- 0.52
+  ref_sd   <- 0.33
+  ref_n    <- 17
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Chimps_FACET"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if(species %in% c("orangs")){
+  ref_mean <- 0.22
+  ref_sd   <- 0.09
+  ref_n    <- 6
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Orangs_REJOINTComp"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if(species %in% c("bonobos", "bonobos2")){
+  ref_mean <- 0.37
+  ref_sd   <- 0.19
+  ref_n    <- 9
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Bonobos_REJOINTComp"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+df_plot_precrms <- df_plot_precrms |>
+  mutate(species = paste0("5P_", str_to_title(.env$species), "_ETVamis"))
+
+ggplot_precrms <- ggplot(df_plot_precrms, aes(x = species, y = precrms_visd)) +
+  geom_jitter(
+    width = 0.04,
+    height = 0,
+    size = 1.5,
+    alpha = 0.9,
+    color = plot_color,
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    size = 3.2,
+    color = "black"
+  ) +
+  stat_summary(
+    fun.data = mean_cl_normal,
+    geom = "errorbar",
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black"
+  ) +
+  geom_point( # manual value from prior 2-point calibration studies
+    data = df_ref,
+    aes(x = species, y = mean),
+    size = 3.2,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  geom_errorbar(
+    data = df_ref,
+    aes(x = species, y = mean, ymin = lower, ymax = upper),
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  scale_y_continuous(
+    breaks = c(0, 0.5, 1.0, 1.5, 2.0),
+    limits = c(0, 2)
+  ) +
+  labs(
+    x = NULL,
+    y = "Precision (RMS)\nin visual degrees"
+  ) +
+  theme_classic(base_size = 18) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 16),
+    axis.title.y = element_text(size = 20),
+    axis.text.y = element_text(size = 16)
+  )
+
+png(here("img", paste0(species, "_precrms_paperplot.png")), width = 2480/2, height = 3508/4, res = 100)
+ggplot_precrms
+dev.off()
+
+dq_2p <- dq_2p |> 
+  bind_rows(df_ref |> mutate(dq = "precision_rms")) |> 
+  mutate(n = df_plot_precrms |> nrow())
+
+# Precision (SD) ----
+df_preproc_temp_precisionsd <- df
+
+param_precsd <- data.frame(
+  position = c(
+    "top_left",
+    "bot_left",
+    "top_right",
+    "bot_right",
+    "center_center"
+  ),
+  xmin = c(380 - buffer, 380 - buffer, 1340 - buffer, 1340 - buffer, 860 - buffer),
+  xmax = c(580 + buffer, 580 + buffer, 1540 + buffer, 1540 + buffer, 1060 + buffer),
+  ymin = c(170 - buffer, 710 - buffer, 170 - buffer, 710 - buffer, 440 - buffer),
+  ymax = c(370 + buffer, 910 + buffer, 370 + buffer, 910 + buffer, 640 + buffer),
+  df_name = c(
+    "df_precsd_poptopleft",
+    "df_precsd_popbotleft",
+    "df_precsd_poptopright",
+    "df_precsd_popbotright",
+    "df_precsd_popcenter"
+  )
+)
+
+for (j in c(1:5)) {
+  df_precsd_temp <- calculate_precision_sd(
+    df_preproc_temp_precisionsd |> filter(stimulus == "checkflake" &
+                                            position == param_precsd$position[j]),
+    media_col = "stimulus",
+    gaze_event_col = "eye_movement_type",
+    id_col = "recording_name",
+    stimulus_vec = "checkflake",
+    gaze_event_index_col = "eye_movement_type_index",
+    gaze_event_dur_col = "gaze_event_duration_revised",
+    x_fix = "fixation_point_x",
+    y_fix = "fixation_point_y",
+    x = "gaze_point_x",
+    y = "gaze_point_y",
+    trial = "session_trial",
+    screen_height_min = 0 - buffer,
+    screen_width_min = 0 - buffer,
+    screen_height_max = 1080 + buffer,
+    screen_width_max = 1920 + buffer,
+    aoi_buffer_px_x = 0,
+    aoi_buffer_px_y = 0,
+    xmin = param_precsd$xmin[j],
+    xmax = param_precsd$xmax[j],
+    ymin = param_precsd$ymin[j],
+    ymax = param_precsd$ymax[j],
+    off_exclude = TRUE,
+    longest_fix_only = FALSE,
+    AOI_only = FALSE
+  ) |>
+    mutate(precsd_visd = precsd * onepx_in_visd(60, 92)) |>
+    left_join(
+      df_preproc_temp_precisionsd |> select(stimulus, position, session_trial) |> distinct(),
+      by = "session_trial"
+    ) |>
+    drop_na(precsd_visd)
+  
+  assign(param_precsd$df_name[j], df_precsd_temp)
+  rm(df_precsd_temp)
+}
+
+df_precsd_tot <- df_precsd_poptopleft |>
+  bind_rows(
+    df_precsd_popbotleft,
+    df_precsd_poptopright,
+    df_precsd_popbotright,
+    df_precsd_popcenter
+  ) |>
+  mutate(data_quality = "precisionsd") |>
+  drop_na(precsd_visd)
+
+rm(df_precsd_popbotleft, df_precsd_popbotright, df_precsd_popcenter, df_precsd_poptopleft,
+   df_precsd_poptopright, df_preproc_temp_precisionsd)
+
+# Plot Precision (SD) ----
+df_plot_precsd <- df_precsd_tot |>
+  separate(recording_name, into = c("experiment_unit", "name", "sex", "session"), sep = "_") |>
+  separate(session_trial, into = c("session", "trial"), sep = "_") |> 
+  mutate(name = str_to_lower(name)) |> 
+  group_by(name, session, trial) |> 
+  summarise(
+    precsd_visd = mean(precsd_visd, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  group_by(name) |> 
+  summarise(
+    precsd_visd = mean(precsd_visd, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+if(species %in% c("a_chimps", "b_chimps")){
+  ref_mean <- 0.36
+  ref_sd   <- 0.27
+  ref_n    <- 17
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Chimps_FACET"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if(species %in% c("orangs")){
+  ref_mean <- 0.14
+  ref_sd   <- 0.09
+  ref_n    <- 6
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Orangs_REJOINTComp"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if(species %in% c("bonobos", "bonobos2")){
+  ref_mean <- 0.25
+  ref_sd   <- 0.15
+  ref_n    <- 9
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = paste0("2P_Bonobos_REJOINTComp"),
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+df_plot_precsd <- df_plot_precsd |>
+  mutate(species = paste0("5P_", str_to_title(.env$species), "_ETVamis"))
+
+ggplot_precsd <- ggplot(df_plot_precsd, aes(x = species, y = precsd_visd)) +
+  geom_jitter(
+    width = 0.04,
+    height = 0,
+    size = 1.5,
+    alpha = 0.9,
+    color = plot_color,
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    size = 3.2,
+    color = "black"
+  ) +
+  stat_summary(
+    fun.data = mean_cl_normal,
+    geom = "errorbar",
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black"
+  ) +
+  geom_point( # manual value from prior 2-point calibration studies
+    data = df_ref,
+    aes(x = species, y = mean),
+    size = 3.2,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  geom_errorbar(
+    data = df_ref,
+    aes(x = species, y = mean, ymin = lower, ymax = upper),
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  scale_y_continuous(
+    breaks = c(-0.5, 0, 0.5, 1.0, 1.5, 2.0),
+    limits = c(-0.5, 2)
+  ) +
+  labs(
+    x = NULL,
+    y = "Precision (SD)\nin visual degrees"
+  ) +
+  theme_classic(base_size = 18) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 16),
+    axis.title.y = element_text(size = 20),
+    axis.text.y = element_text(size = 16)
+  )
+
+png(here("img", paste0(species, "_precsd_paperplot.png")), width = 2480/2, height = 3508/4, res = 100)
+ggplot_precsd
+dev.off()
+
+dq_2p <- dq_2p |> 
+  bind_rows(df_ref |> mutate(dq = "precision_sd")) |> 
+  mutate(n = df_plot_precsd |> nrow())
+
+# Robustness ----
+if(species %in% c("bonobos","bonobos2")){truncate <- 42739}
+if(species == "orangs"){truncate <- 32129}
+if(species == "b_chimps"){truncate <- 13698} # to make it comparable with FACET
+
+df_robustness <- df |> 
+  group_by(name) |> 
+  group_modify(~ calculate_robustness_2(
+    df                      = .x,
+    trial_col               = "session_trial",
+    gaze_x_col              = "gaze_point_x",
+    gaze_y_col              = "gaze_point_y",
+    sample_duration_col     = "gaze_sample_duration",
+    blink_left_col          = "blink_detection.left",
+    blink_right_col         = "blink_detection.right",
+    blink_removal           = TRUE,
+    blink_label             = "blink",
+    blink_replacement_value = 99999,
+    robustness_check_col    = "robustness_check",
+    cum_duration_col        = "cum_duration",
+    truncate_at_t_ms        = truncate,
+    print_max_cum           = TRUE
+  )) |> 
+  ungroup() |> 
+  mutate(robustness_prop_2 = robustness_ms_2 / truncate)
+
+# Plot Robustness ----
+df_plot_rob <- df_robustness |>
+  mutate(
+    species = paste0("5P_", str_to_title(.env$species), "_ETVamis"),
+    rob_prop = robustness_prop_2
+  )
+
+if (species %in% c("a_chimps", "b_chimps")) {
+  ref_mean <- 0.03
+  ref_sd   <- 0.02
+  ref_n    <- 17
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = "2P_Chimps_FACET",
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if (species %in% c("orangs")) {
+  ref_mean <- 0.02
+  ref_sd   <- 0.0099
+  ref_n    <- 6
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = "2P_Orangs_REJOINTComp",
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+if (species %in% c("bonobos", "bonobos2")) {
+  ref_mean <- 0.02
+  ref_sd   <- 0.02
+  ref_n    <- 9
+  ref_se   <- ref_sd / sqrt(ref_n)
+  ref_ci   <- ref_se * qt(0.975, df = ref_n - 1)
+  
+  df_ref <- data.frame(
+    species = "2P_Bonobos_REJOINTComp",
+    mean    = ref_mean,
+    sd = ref_sd,
+    lower   = ref_mean - ref_ci,
+    upper   = ref_mean + ref_ci
+  )
+}
+
+ggplot_rob <- ggplot(df_plot_rob, aes(x = species, y = rob_prop)) +
+  geom_jitter(
+    width = 0.04,
+    height = 0,
+    size = 1.5,
+    alpha = 0.9,
+    color = plot_color
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    size = 3.2,
+    color = "black"
+  ) +
+  stat_summary(
+    fun.data = mean_cl_normal,
+    geom = "errorbar",
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black"
+  ) +
+  geom_point(
+    data = df_ref,
+    aes(x = species, y = mean),
+    size = 3.2,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  geom_errorbar(
+    data = df_ref,
+    aes(x = species, y = mean, ymin = lower, ymax = upper),
+    width = 0.08,
+    linewidth = 0.8,
+    color = "black",
+    inherit.aes = FALSE
+  ) +
+  scale_y_continuous(
+    breaks = seq(0, 0.08, by = 0.02),
+    limits = c(0, 0.08)
+  ) +
+  labs(
+    x = NULL,
+    y = "Robustness\n(proportion)"
+  ) +
+  theme_classic(base_size = 18) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 16),
+    axis.title.y = element_text(size = 20),
+    axis.text.y = element_text(size = 16)
+  )
+
+png(here("img", paste0(species, "_robustness_paperplot.png")), width = 2480 / 2, height = 3508 / 4, res = 100)
+ggplot_rob
+dev.off()
+
+# Summed Up Data ----
+dq_2p <- dq_2p |> 
+  bind_rows(df_ref |> mutate(dq = "robustness")) |> 
+  mutate(points = "2") |> 
+  mutate(n = df_plot_rob |> nrow())
+
+dq_5p <- bind_rows(
+  calc_dq(df_plot_acc,     acc_visd,      "accuracy"),
+  calc_dq(df_plot_precrms, precrms_visd, "precision_rms"),
+  calc_dq(df_plot_precsd,  precsd_visd,  "precision_sd"),
+  calc_dq(df_plot_rob,     robustness_prop_2,     "robustness")
+) |> 
+  mutate(points = "5") |> 
+  mutate(n = df$name |> unique() |> length())
+
+dq_overall <- dq_2p |> 
+  bind_rows(dq_5p)
+
+# Save summed up data
+write.table(dq_overall, here("sum_data", species, "dq_overall.txt"), sep = "\t",
+  row.names = FALSE, quote = FALSE)
+
+# Valid Trials ----
+acc_trials <- df_acc_tot |>
+  mutate(individual = str_extract(recording_name, "(?<=CalibrationCheck_)[A-Za-z]+")) |>
+  count(individual, name = "n_trials")
+write.table(acc_trials, here("sum_data", species, "acc_trials.txt"), sep = "\t",
+            row.names = FALSE, quote = FALSE)
+
+precrms_trials <- df_precrms_tot |>
+  mutate(individual = str_extract(recording_name, "(?<=CalibrationCheck_)[A-Za-z]+")) |>
+  select(individual, session_trial) |>
+  distinct() |>
+  count(individual, name = "n_trials")
+write.table(precrms_trials, here("sum_data", species, "precrms_trials.txt"), sep = "\t",
+            row.names = FALSE, quote = FALSE)
+
+precsd_trials <- df_precsd_tot |>
+  mutate(individual = str_extract(recording_name, "(?<=CalibrationCheck_)[A-Za-z]+")) |>
+  select(individual, session_trial) |>
+  distinct() |>
+  count(individual, name = "n_trials")
+write.table(precsd_trials, here("sum_data", species, "precsd_trials.txt"), sep = "\t",
+            row.names = FALSE, quote = FALSE)
+
+# Presented Trials ----
+# df |>
+#   select(recording_name, session_trial, stimulus, position) |>
+#   mutate(recording_name = tolower(recording_name)) |>
+#   distinct() |>
+#   group_by(recording_name) |>
+#   count() |>
+#   ungroup()
