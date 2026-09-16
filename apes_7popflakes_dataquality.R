@@ -43,31 +43,40 @@ files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # 
 species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
 
 # Define AOIs -------------------------------------------------------------
-# Popflakes
-# topleftflake_x_topleft <- 380 - buffer
-# topleftflake_y_topleft <- 170 - buffer
-# topleftflake_x_botright <- 580 + buffer
-# topleftflake_y_botright <- 370 + buffer
-# 
-# botleftflake_x_topleft <- 380 - buffer
-# botleftflake_y_topleft <- 710 - buffer
-# botleftflake_x_botright <- 580 + buffer
-# botleftflake_y_botright <- 910 + buffer
-# 
-# toprightflake_x_topleft <- 1340 - buffer
-# toprightflake_y_topleft <- 170 - buffer
-# toprightflake_x_botright <- 1540 + buffer
-# toprightflake_y_botright <- 370 + buffer
-# 
-# botrightflake_x_topleft <- 1340 - buffer
-# botrightflake_y_topleft <- 710 - buffer
-# botrightflake_x_botright <- 1540 + buffer
-# botrightflake_y_botright <- 910 + buffer
-# 
-# centralflake_x_topleft <- 860 - buffer
-# centralflake_y_topleft <- 440 - buffer
-# centralflake_x_botright <- 1060 + buffer
-# centralflake_y_botright <- 640 + buffer
+top1_x_topleft <- 154 - buffer
+top1_y_topleft <- 78 - buffer
+top1_x_botright <- 354 + buffer
+top1_y_botright <- 278 + buffer
+
+top2_x_topleft <- 594 - buffer
+top2_y_topleft <- 78 - buffer
+top2_x_botright <- 794 + buffer
+top2_y_botright <- 278 + buffer
+
+top3_x_topleft <- 1124 - buffer
+top3_y_topleft <- 78 - buffer
+top3_x_botright <- 1324 + buffer
+top3_y_botright <- 278 + buffer
+
+top4_x_topleft <- 1564 - buffer
+top4_y_topleft <- 78 - buffer
+top4_x_botright <- 1764 + buffer
+top4_y_botright <- 278 + buffer
+
+actora_x_topleft <- 475 - buffer
+actora_y_topleft <- 464 - buffer
+actora_x_botright <- 675 + buffer
+actora_y_botright <- 664 + buffer
+
+actorb_x_topleft <- 1244 - buffer
+actorb_y_topleft <- 464 - buffer
+actorb_x_botright <- 1444 + buffer
+actorb_y_botright <- 664 + buffer
+
+to_x_topleft <- 859 - buffer
+to_y_topleft <- 814 - buffer
+to_x_botright <- 1059 + buffer
+to_y_botright <- 1014 + buffer
 
 # Read Data ---------------------------------------------------------------
 raw <- read.table(here("data", "data_apes_7popflakes", species, "main_data.tsv"), header = TRUE, sep = "\t")
@@ -99,3 +108,61 @@ df <- df |>
   separate(presented_stimulus_name,
            into = c("pre_post", "trial", "stimulus", "position", "duration"), 
            remove = FALSE, sep = "_")
+
+# Create session, name, and order column
+df <- df |> 
+  extract(
+    recording_name,
+    into = c("name", "order", "session"),
+    regex = "([A-Za-z]+) (E\\d+)_(\\d+)",
+    remove = FALSE
+  ) |> 
+  mutate(
+    name = str_to_lower(name),
+    session = as.numeric(session)
+  )
+
+# Create session_trial column
+df <- df |> 
+  unite(col = "session_trial", session, trial, sep = "_", remove = F)
+
+# Add cumulative duration per trial
+df <- df |> 
+  group_by(name, session_trial, duration) |> 
+  mutate(timeline_trial_units = cumsum(gaze_sample_duration)) |> 
+  group_by(name, session_trial) |> 
+  mutate(timeline_trial_tot = cumsum(gaze_sample_duration)) |> 
+  ungroup()
+
+# Define AOIs 
+df <- df |>
+  mutate(gaze_point_x = as.numeric(gaze_point_x),
+         gaze_point_y = as.numeric(gaze_point_y)) |>
+  mutate(fixation_point_x = as.numeric(fixation_point_x),
+         fixation_point_y = as.numeric(fixation_point_y))
+
+# Based on Fixations
+df$aoi_fixation <- "not_in_aoi"
+
+df <- df |>
+  mark_aoi(name = "top_left", x_min = top1_x_topleft, x_max = top1_x_botright, y_min = top1_y_topleft, y_max = top1_y_botright,
+           stimulus_name = "popflake", position_name = "top1", x_col = "fixation_point_x", y_col = "fixation_point_y",
+           aoi_col = "aoi_fixation") |>
+  mark_aoi(name = "bot_left", top2_x_topleft, top2_x_botright, top2_y_topleft, top2_y_botright,
+           stimulus_name = "popflake", position_name = "top2", x_col = "fixation_point_x", y_col = "fixation_point_y",
+           aoi_col = "aoi_fixation") |>
+  mark_aoi(name = "top_right", top3_x_topleft, top3_x_botright, top3_y_topleft, top3_y_botright, 
+           stimulus_name = "popflake", position_name = "top3", x_col = "fixation_point_x", y_col = "fixation_point_y",
+           aoi_col = "aoi_fixation") |>
+  mark_aoi(name = "bot_right",  top4_x_topleft, top4_x_botright, top4_y_topleft,  top4_y_botright, 
+           stimulus_name = "popflake", position_name = "top4", x_col = "fixation_point_x", y_col = "fixation_point_y",
+           aoi_col = "aoi_fixation") |>
+  mark_aoi(name = "center_center", actora_x_topleft, actora_x_botright, actora_y_topleft,  actora_y_botright, 
+           stimulus_name = "popflake", position_name = "actora", x_col = "fixation_point_x", y_col = "fixation_point_y",
+           aoi_col = "aoi_fixation") |> 
+mark_aoi(name = "center_center", actorb_x_topleft, actorb_x_botright, actorb_y_topleft,  actorb_y_botright, 
+         stimulus_name = "popflake", position_name = "actorb", x_col = "fixation_point_x", y_col = "fixation_point_y",
+         aoi_col = "aoi_fixation") |> 
+mark_aoi(name = "center_center", to_x_topleft, to_x_botright, to_y_topleft,  to_y_botright, 
+         stimulus_name = "popflake", position_name = "to", x_col = "fixation_point_x", y_col = "fixation_point_y",
+         aoi_col = "aoi_fixation")
