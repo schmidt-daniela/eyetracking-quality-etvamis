@@ -38,7 +38,7 @@ plot_color <- switch(species,
                      "a_chimps"  = "#F0E442",
                      "#999999"  # "fallback-color, if species cannot be found
 )
-data_path <- here("data", "data_apes_5popflakes", species)
+data_path <- here("data", "data_apes_7popflakes", species)
 files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # get file names
 species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
 
@@ -141,28 +141,189 @@ df <- df |>
   mutate(fixation_point_x = as.numeric(fixation_point_x),
          fixation_point_y = as.numeric(fixation_point_y))
 
+# Make position values to lower case
+df$position <- tolower(as.character(df$position))
+
 # Based on Fixations
 df$aoi_fixation <- "not_in_aoi"
 
 df <- df |>
-  mark_aoi(name = "top_left", x_min = top1_x_topleft, x_max = top1_x_botright, y_min = top1_y_topleft, y_max = top1_y_botright,
+  mark_aoi(name = "top1", x_min = top1_x_topleft, x_max = top1_x_botright, y_min = top1_y_topleft, y_max = top1_y_botright,
            stimulus_name = "popflake", position_name = "top1", x_col = "fixation_point_x", y_col = "fixation_point_y",
            aoi_col = "aoi_fixation") |>
-  mark_aoi(name = "bot_left", top2_x_topleft, top2_x_botright, top2_y_topleft, top2_y_botright,
+  mark_aoi(name = "top2", top2_x_topleft, top2_x_botright, top2_y_topleft, top2_y_botright,
            stimulus_name = "popflake", position_name = "top2", x_col = "fixation_point_x", y_col = "fixation_point_y",
            aoi_col = "aoi_fixation") |>
-  mark_aoi(name = "top_right", top3_x_topleft, top3_x_botright, top3_y_topleft, top3_y_botright, 
+  mark_aoi(name = "top3", top3_x_topleft, top3_x_botright, top3_y_topleft, top3_y_botright, 
            stimulus_name = "popflake", position_name = "top3", x_col = "fixation_point_x", y_col = "fixation_point_y",
            aoi_col = "aoi_fixation") |>
-  mark_aoi(name = "bot_right",  top4_x_topleft, top4_x_botright, top4_y_topleft,  top4_y_botright, 
+  mark_aoi(name = "top4",  top4_x_topleft, top4_x_botright, top4_y_topleft,  top4_y_botright, 
            stimulus_name = "popflake", position_name = "top4", x_col = "fixation_point_x", y_col = "fixation_point_y",
            aoi_col = "aoi_fixation") |>
-  mark_aoi(name = "center_center", actora_x_topleft, actora_x_botright, actora_y_topleft,  actora_y_botright, 
+  mark_aoi(name = "actora", actora_x_topleft, actora_x_botright, actora_y_topleft,  actora_y_botright, 
            stimulus_name = "popflake", position_name = "actora", x_col = "fixation_point_x", y_col = "fixation_point_y",
            aoi_col = "aoi_fixation") |> 
-mark_aoi(name = "center_center", actorb_x_topleft, actorb_x_botright, actorb_y_topleft,  actorb_y_botright, 
+mark_aoi(name = "actorb", actorb_x_topleft, actorb_x_botright, actorb_y_topleft,  actorb_y_botright, 
          stimulus_name = "popflake", position_name = "actorb", x_col = "fixation_point_x", y_col = "fixation_point_y",
          aoi_col = "aoi_fixation") |> 
-mark_aoi(name = "center_center", to_x_topleft, to_x_botright, to_y_topleft,  to_y_botright, 
+mark_aoi(name = "to", to_x_topleft, to_x_botright, to_y_topleft,  to_y_botright, 
          stimulus_name = "popflake", position_name = "to", x_col = "fixation_point_x", y_col = "fixation_point_y",
          aoi_col = "aoi_fixation")
+
+# Define AOIs (Based on Gaze Samples)
+df$aoi_samples <- "not_in_aoi"
+
+df <- df |>
+  mark_aoi(name = "top1", x_min = top1_x_topleft, x_max = top1_x_botright, y_min = top1_y_topleft, y_max = top1_y_botright,
+           stimulus_name = "popflake", position_name = "top1", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples") |>
+  mark_aoi(name = "top2", top2_x_topleft, top2_x_botright, top2_y_topleft, top2_y_botright,
+           stimulus_name = "popflake", position_name = "top2", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples") |>
+  mark_aoi(name = "top3", top3_x_topleft, top3_x_botright, top3_y_topleft, top3_y_botright, 
+           stimulus_name = "popflake", position_name = "top3", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples") |>
+  mark_aoi(name = "top4",  top4_x_topleft, top4_x_botright, top4_y_topleft,  top4_y_botright, 
+           stimulus_name = "popflake", position_name = "top4", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples") |>
+  mark_aoi(name = "actora", actora_x_topleft, actora_x_botright, actora_y_topleft,  actora_y_botright, 
+           stimulus_name = "popflake", position_name = "actora", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples") |> 
+  mark_aoi(name = "actorb", actorb_x_topleft, actorb_x_botright, actorb_y_topleft,  actorb_y_botright, 
+           stimulus_name = "popflake", position_name = "actorb", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples") |> 
+  mark_aoi(name = "to", to_x_topleft, to_x_botright, to_y_topleft,  to_y_botright, 
+           stimulus_name = "popflake", position_name = "to", x_col = "gaze_point_x", y_col = "gaze_point_y",
+           aoi_col = "aoi_samples")
+
+# Identify whether at least one fixation within AOI
+fixation_in_aoi <- df |>
+  filter(eye_movement_type == "Fixation") |>
+  select(name, session_trial, position, aoi_fixation) |>
+  filter(aoi_fixation != "not_in_aoi") |>
+  distinct() |>
+  select(name, session_trial, position) |>
+  mutate(excluded_fixation = "included")
+
+df <- df |>
+  left_join(fixation_in_aoi, by = c("name", "session_trial", "position")) |>
+  mutate(excluded_fixation = replace_na(excluded_fixation, "excluded"))
+
+# Time within session
+df <- df |> 
+  group_by(recording_name) |> 
+  mutate(timeline_experiment = cumsum(gaze_sample_duration)) |> 
+  ungroup()
+
+# Blink Detection ----
+df <- df |> 
+  mutate(pupil_diameter_left = as.numeric(str_replace(pupil_diameter_left, ",", "."))) |> 
+  mutate(pupil_diameter_right = as.numeric(str_replace(pupil_diameter_right, ",", ".")))
+
+# Pre Smoothing
+png(here("img", "blink_7popflakes", paste0("blink_1", ".png")), width = 2048, height = 1152, res = 300)
+p1 <- ggplot(df |>
+               mutate(time = cumsum(c(0, diff(recording_timestamp)))) |> 
+               mutate(time = cumsum(time)/1000),
+             aes(x = time, y = pupil_diameter_left)) + 
+  geom_point() + 
+  geom_line(colour="black") +
+  ylim(1,7)
+print(p1)
+dev.off()
+
+# Smooth Data
+df <- df |> 
+  mutate(pupil_diameter_left = moving_average_pupil(pupil_diameter_left, n = 10))
+
+## Save Plot (Post Smoothing)
+png(here("img", "blink_7popflakes", paste0("blink_2_postsmooth", ".png")), width = 2048, height = 1152, res = 300)
+p2 <- ggplot(df |>
+               mutate(time = cumsum(c(0, diff(recording_timestamp)))) |> 
+               mutate(time = cumsum(time)/1000),
+             aes(x = time, y = pupil_diameter_left)) + 
+  geom_point() + 
+  geom_line(colour="black") +
+  ylim(1,7)
+print(p2)
+dev.off()
+
+# Interpolate Outliers
+df <- interpolate_outliers(df = df, pupil_left_col  = "pupil_diameter_left", pupil_right_col = "pupil_diameter_right", n_sd = 3)
+df <- df |> rowwise() |>  mutate(pupil_diameter_average = mean(c(pupil_diameter_left, pupil_diameter_right), na.rm = T)) |> ungroup()
+
+## Save Plot (Post Outlierinterpolation)
+png(here("img", "blink_7popflakes", paste0("blink_3_postoutlier", ".png")), width = 2048, height = 1152, res = 300)
+p3 <- ggplot(df |>
+               mutate(time = cumsum(c(0, diff(recording_timestamp)))) |> 
+               mutate(time = cumsum(time)/1000),
+             aes(x = time, y = pupil_diameter_left)) + 
+  geom_point() + 
+  geom_line(colour="black") +
+  ylim(1,7)
+print(p3)
+dev.off()
+
+# Add Velocity
+df <- add_pupil_velocity(df = df, timestamp_col = "recording_timestamp", timestamp_unit = "s", 
+                         pupil_left_col = "pupil_diameter_left", pupil_right_col = "pupil_diameter_right")
+
+# Add Onset Offset of NA Chains
+df <- mark_na_chain_onset_offset(df = df, col = "pupil_diameter_left", onset_col = "pupil_na_onset.left", offset_col = "pupil_na_offset.left", min_run = 2)
+df <- mark_na_chain_onset_offset(df = df, col = "pupil_diameter_right", onset_col = "pupil_na_onset.right", offset_col = "pupil_na_offset.right", min_run = 2)
+
+# Add Velocity Threshold + Evaluate Whether It Was Crossed
+df <- detect_velocity_thresholds(df = df, vel_left_col  = "Velocity.left", vel_right_col = "Velocity.right",
+                                 center = "median", n_sd = 0.1, onset_col_left   = "threshold_onset.left", 
+                                 onset_col_right  = "threshold_onset.right", offset_col_left  = "threshold_offset.left",
+                                 offset_col_right = "threshold_offset.right")
+
+# Detect Blinks Based on Onset of Threshold-Crossing
+df <- detect_blinks_from_onset_offset(df = df, pupil_left_col = "pupil_diameter_left", pupil_right_col = "pupil_diameter_right",
+                                      onset_col_left = "threshold_onset.left", onset_col_right = "threshold_onset.right",
+                                      offset_col_left = "threshold_offset.left", offset_col_right = "threshold_offset.right",
+                                      onset_value = "onset", offset_value = "offset",
+                                      blink_col_left = "blink_detection.left", blink_col_right = "blink_detection.right",
+                                      blink_value = "blink", lookback = 5, lookahead = 5)
+
+# Exclude Too Short/ Long Blinks
+df <- filter_blinks_by_duration(df = df, blink_col = "blink_detection.left", blink_value = "blink",
+                                timestamp_col  = "recording_timestamp",  # assumed in ms
+                                min_ms = 10, max_ms = 400)
+df <- filter_blinks_by_duration(df = df, blink_col = "blink_detection.right", blink_value = "blink",
+                                timestamp_col  = "recording_timestamp",  # assumed in ms
+                                min_ms = 10, max_ms = 400)
+
+# Visualize Detected Blinks
+plots <- plot_blinks(
+  df = df,
+  eye = "both",
+  flank_n = 10,
+  min_run = 2,
+  time_col  = "timeline_trial_tot",
+  pupil_left_col = "pupil_diameter_left",
+  pupil_right_col = "pupil_diameter_right",
+  blink_col_left  = "blink_detection.left",
+  blink_col_right = "blink_detection.right",
+  title_cols = c("recording_name", "session_trial"),
+  trial_col = "session_trial"
+)
+save_detected_blinks_pdf(plots, out_dir = here("img", "blink_7popflakes"), df)
+
+# Cleaning II ----
+# Correction of Fixation Durations
+# Why? Because gaze_event_duration refers to the duration of a fixation, irrespective of
+# whether the duration was within one trial or across two trials. The analyses, however,
+# are conducted on a trial level. Therefore, we need the fixation duration in one trial
+# and cut off the duration of the fixation in a previous or subsequent trial.
+df <- df |>
+  group_by(name, session_trial, eye_movement_type_index, eye_movement_type) |>
+  mutate(gaze_event_duration_revised = sum(gaze_sample_duration)) |>
+  ungroup()
+
+# Accuracy ----
+df_accuracy <- df
+
+# Exclude Trials Without Fixation in Target AOI
+df_accuracy <- df_accuracy |> filter(excluded_fixation == "included")
+

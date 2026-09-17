@@ -29,7 +29,7 @@ calc_dq <- function(df, val_col, dq_label) {
 
 # Set Parameters ----------------------------------------------------------
 buffer <- 120
-species <- "b_chimps" # "bonobos" or "orangs" or "bonobos2" or "b_chimps"
+species <- "orangs" # "bonobos" or "orangs" or "bonobos2" or "b_chimps"
 plot_color <- switch(species,
                      "orangs"   = "#E69F00",
                      "bonobos"  = "#A01C99",
@@ -226,7 +226,7 @@ df <- df |>
   mutate(pupil_diameter_right = as.numeric(str_replace(pupil_diameter_right, ",", ".")))
 
 # Pre Smoothing
-png(here("img", "blink", paste0("blink_1_", ".png")), width = 2048, height = 1152, res = 300)
+png(here("img", "blink_5popflakes", paste0("blink_1", ".png")), width = 2048, height = 1152, res = 300)
 p1 <- ggplot(df |>
                mutate(time = cumsum(c(0, diff(recording_timestamp)))) |> 
                mutate(time = cumsum(time)/1000),
@@ -242,7 +242,7 @@ df <- df |>
   mutate(pupil_diameter_left = moving_average_pupil(pupil_diameter_left, n = 10))
 
 ## Save Plot (Post Smoothing)
-png(here("img", "blink", paste0("blink_2_postsmooth", ".png")), width = 2048, height = 1152, res = 300)
+png(here("img", "blink_5popflakes", paste0("blink_2_postsmooth", ".png")), width = 2048, height = 1152, res = 300)
 p2 <- ggplot(df |>
                mutate(time = cumsum(c(0, diff(recording_timestamp)))) |> 
                mutate(time = cumsum(time)/1000),
@@ -258,7 +258,7 @@ df <- interpolate_outliers(df = df, pupil_left_col  = "pupil_diameter_left", pup
 df <- df |> rowwise() |>  mutate(pupil_diameter_average = mean(c(pupil_diameter_left, pupil_diameter_right), na.rm = T)) |> ungroup()
 
 ## Save Plot (Post Outlierinterpolation)
-png(here("img", "blink", paste0("blink_3_postoutlier", ".png")), width = 2048, height = 1152, res = 300)
+png(here("img", "blink_5popflakes", paste0("blink_3_postoutlier", ".png")), width = 2048, height = 1152, res = 300)
 p3 <- ggplot(df |>
                mutate(time = cumsum(c(0, diff(recording_timestamp)))) |> 
                mutate(time = cumsum(time)/1000),
@@ -310,10 +310,10 @@ plots <- plot_blinks(
   pupil_right_col = "pupil_diameter_right",
   blink_col_left  = "blink_detection.left",
   blink_col_right = "blink_detection.right",
-  title_cols = c("participant_name", "recording_name", "session_trial"),
+  title_cols = c("recording_name", "session_trial"),
   trial_col = "session_trial"
 )
-save_detected_blinks_pdf(plots, out_dir = here("img", "blink"), df)
+save_detected_blinks_pdf(plots, out_dir = here("img", "blink_5popflakes"), df)
 
 # Cleaning II ----
 # Correction of Fixation Durations
