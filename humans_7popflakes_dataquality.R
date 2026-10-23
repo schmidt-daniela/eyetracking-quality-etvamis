@@ -32,7 +32,7 @@ save_sumdata <- function(df, name) {
 
 # Set Parameters ----------------------------------------------------------
 buffer <- 80
-age_group <- "12m" # "12m" or "35m"
+age_group <- "35m" # "12m" or "35m"
 data_path <- here("data", "data_humans_7popflakes_5p")
 files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # get file names
 age_group_label <- str_replace(age_group, "m", "M")  # "12M" / "35M"

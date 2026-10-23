@@ -32,15 +32,7 @@ save_sumdata <- function(df, name) {
 
 # Set Parameters ----------------------------------------------------------
 buffer <- 120
-species <- "b_chimps" # "bonobos" or "orangs" or "b_chimps"
-plot_color <- switch(species,
-                     "orangs"   = "#E69F00",
-                     "bonobos"  = "#A01C99",
-                     "bonobos2" = "#56B4E9",
-                     "b_chimps"  = "#009E73",
-                     "a_chimps"  = "#F0E442",
-                     "#999999"  # "fallback-color, if species cannot be found
-)
+species <- "orangs" # "bonobos" or "orangs" or "b_chimps" or "a_chimps" or "chimps"
 data_path <- here("data", "data_apes_7popflakes_5p", species)
 files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # get file names
 species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
@@ -149,6 +141,41 @@ df <- df |>
 # Create session_trial column
 df <- df |> 
   unite(col = "session_trial", session, trial, sep = "_", remove = F)
+
+# Remove "invalid" trials
+if(species == "orangs"){
+  df <- df |> 
+    filter(!(str_detect(recording_name, "Raja") & session == 1 & trial_within_session %in% c("2", "3"))) |> 
+    filter(!(str_detect(recording_name, "Raja") & session == 2 & trial_within_session %in% c("1", "2", "3"))) |> 
+    filter(!(str_detect(recording_name, "Raja") & session == 6 & trial_within_session %in% c("1", "3", "4", "5", "6", "7"))) |> 
+    filter(!(str_detect(recording_name, "Lursa") & session == 1 & trial_within_session %in% c("5", "6", "7"))) |> 
+    filter(!(str_detect(recording_name, "Lursa") & session == 2 & trial_within_session %in% c("2", "3"))) |>
+    filter(!(str_detect(recording_name, "Lursa") & session == 4 & trial_within_session %in% c("1", "2", "3"))) |> 
+    filter(!(str_detect(recording_name, "Lursa") & session == 6 & trial_within_session %in% c("6", "7")))
+}
+
+if(species == "bonobos"){
+  df <- df |> 
+    filter(!(str_detect(recording_name, "Luiza") & session == 1 & trial_within_session =="6")) |> 
+    filter(!(str_detect(recording_name, "Luiza") & session == 2 & trial_within_session == "6")) |> 
+    filter(!(str_detect(recording_name, "Lexi") & session == 4 & trial_within_session %in% c("1", "2"))) |> 
+    filter(!(str_detect(recording_name, "Lexi") & session == 6 & trial_within_session == "5")) |>
+    filter(!(str_detect(recording_name, "Gerda") & session == 6 & trial_within_session == "5"))
+}
+
+if(species %in% c("chimps", "a_chimps")){
+  df <- df |> 
+    filter(!(str_detect(recording_name, "Evi") & session == 1 & trial_within_session %in% c("4", "6", "7"))) |> 
+    filter(!(str_detect(recording_name, "Evi") & session == 3 & trial_within_session %in% c("1", "2", "3", "4", "5", "6", "7"))) |> 
+    filter(!(str_detect(recording_name, "Evi") & session == 4 & trial_within_session %in% c("1", "2", "3", "4", "5", "6", "7"))) |> 
+    filter(!(str_detect(recording_name, "Evi") & session == 6 & trial_within_session %in% c("3", "7"))) |> 
+    filter(!(str_detect(recording_name, "Swela") & session == 1 & trial_within_session == "2")) |>
+    filter(!(str_detect(recording_name, "Swela") & session == 2 & trial_within_session %in% c("1", "2", "3", "4"))) |> 
+    filter(!(str_detect(recording_name, "Swela") & session == 3 & trial_within_session %in% c("1", "2", "3", "4", "5", "6"))) |> 
+    filter(!(str_detect(recording_name, "Swela") & session == 4 & trial_within_session %in% c("1", "2", "3", "4", "5", "6", "7"))) |> 
+    filter(!(str_detect(recording_name, "Swela") & session == 5 & trial_within_session %in% c("2", "3", "4", "6"))) |> 
+    filter(!(str_detect(recording_name, "Swela") & session == 6 & trial_within_session %in% c("1", "2", "3", "4", "5", "6", "7")))
+}
 
 # Add cumulative duration per trial
 df <- df |> 
@@ -696,11 +723,13 @@ rm(df_precsd_top1, df_precsd_top2, df_precsd_top3, df_precsd_top4,
    df_precsd_actora, df_precsd_actorb, df_precsd_to, df_preproc_temp_precisionsd)
 
 # Robustness ----
+# The values saved in truncate are the minimum "Max cum_duration overall" that is
+# shown when running the calculate_robustness_2-function.
 if(species == "bonobos"){truncate <- 95955}
 if(species == "orangs"){truncate <- 45605}
-if(species == "b_chimps"){truncate <- "filloutlater"} # change value
-if(species == "a_chimps"){truncate <- "filloutlater"} # change value
-if(species == "chimps"){truncate <- "filloutlater"} # change value
+if(species == "b_chimps"){truncate <- 136313} 
+if(species == "a_chimps"){truncate <- 19032} 
+if(species == "chimps"){truncate <- 19032}
 
 df_robustness <- df |> 
   group_by(name) |> 
@@ -717,7 +746,7 @@ df_robustness <- df |>
     blink_replacement_value = 99999,
     robustness_check_col    = "robustness_check",
     cum_duration_col        = "cum_duration",
-    #truncate_at_t_ms        = truncate,
+    truncate_at_t_ms        = truncate,
     print_max_cum           = TRUE
   )) |> 
   ungroup() |> 

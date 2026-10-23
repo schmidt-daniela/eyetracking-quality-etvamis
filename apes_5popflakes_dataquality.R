@@ -34,16 +34,7 @@ save_sumdata <- function(df, name) {
 # Set Parameters ----------------------------------------------------------
 buffer <- 120
 
-species <- "bonobos" # "bonobos" or "orangs" or "bonobos2" or "b_chimps" or "a_chimps" or "chimps"
-
-plot_color <- switch(species,
-                     "orangs"   = "#E69F00",
-                     "bonobos"  = "#A01C99",
-                     "bonobos2" = "#56B4E9",
-                     "b_chimps"  = "#009E73",
-                     "a_chimps"  = "#F0E442",
-                     "#999999"  # "fallback-color, if species cannot be found
-)
+species <- "chimps" # "bonobos" or "orangs" or "bonobos2" or "b_chimps" or "a_chimps" or "chimps"
 
 species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
 
@@ -60,8 +51,7 @@ presented_trials_2p <- case_when(
 study_name_5p <- "et_vamis"
 presented_trials_5p <- case_when(
   study_name_5p == "et_vamis" & species %in% c("orangs", "bonobos", "bonobos2") ~ "20",
-  study_name_5p == "et_vamis" & species == "b_chimps" ~ "10",
-  study_name_5p == "et_vamis" & species %in% c("a_chimps", "chimps") ~ "add this information later"
+  study_name_5p == "et_vamis" & species %in% c("a_chimps", "b_chimps", "chimps") ~ "10"
 )
 
 # Define AOIs -------------------------------------------------------------
@@ -105,7 +95,7 @@ df <- df  |>
 
 df <- df |>
   mutate(
-    Recording.name = if (species == "b_chimps") {
+    Recording.name = if (species %in% c("chimps", "b_chimps")) {
       case_match(
         Recording.name, # rename recording names to make it consistent with bonobos and orangs
         "Alex"      ~ "CalibrationCheck_Alex_M_Session1",
@@ -165,10 +155,23 @@ df <- df |>
   unite(col = "session_trial", session, trial, sep = "_")
 
 # Remove "invalid" trials
-# todo: add orangs
 if(species == "bonobos2"){
   df <- df |> 
     filter(!(str_detect(recording_name, "Lexi") & session_trial %in% c("session3_6", "session4_2", "session4_3")))
+}
+
+if(species == "orangs"){
+  df <- df |> 
+    filter(!(str_detect(recording_name, "Raja") & session_trial %in% c("session1_3", "session2_9"))) |> 
+    filter(!(str_detect(recording_name, "Lursa") & session_trial %in% c("session2_4", "session2_9")))
+}
+
+if(species %in% c("chimps", "a_chimps")){
+  df <- df |> 
+    filter(!(str_detect(recording_name, "Kisha") & session_trial %in% c("session1_3", "session1_7", "session1_9", "session1_10"))) |> 
+    filter(!(str_detect(recording_name, "Evi") & session_trial %in% c("session1_9"))) |> 
+    filter(!(str_detect(recording_name, "Swela") & session_trial %in% c("session1_1", "session1_2", "session1_3", "session1_4", 
+                                                                        "session1_5", "session1_6", "session1_7", "session1_8", "session1_9")))
 }
 
 # Create position column
@@ -938,6 +941,8 @@ dev.off()
 if(species %in% c("bonobos","bonobos2")){truncate <- 42739}
 if(species == "orangs"){truncate <- 32129}
 if(species == "b_chimps"){truncate <- 13698} # to make it comparable with FACET
+if(species == "a_chimps"){truncate <- 966.6} # shortest max. duration of valid data in the a-sample
+if(species == "chimps"){truncate <- 966.6} # shortest max. duration of valid data in the a- & b-sample
 
 df_rob_tot_5p <- df |> 
   group_by(name) |> 
@@ -981,7 +986,7 @@ df_plot_rob <- df_rob_combined |>
     )
   )
 
-y_scale <- if (species == "b_chimps") {
+y_scale <- if (species %in% c("a_chimps", "b_chimps", "chimps")) {
   scale_y_continuous(
     breaks = seq(-0.3, 1, 0.2),
     limits = c(-0.3, 1)
