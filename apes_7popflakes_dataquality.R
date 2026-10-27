@@ -35,7 +35,7 @@ buffer <- 120
 species <- "orangs" # "bonobos" or "orangs" or "b_chimps" or "a_chimps" or "chimps"
 data_path <- here("data", "data_apes_7popflakes_5p", species)
 files <- list.files(path = data_path, pattern = "\\.tsv$", full.names = TRUE) # get file names
-species_label <- str_to_title(species)  # "Bonobos" / "Orangs"
+species_label <- str_to_title(species) # "Bonobos" / "Orangs"
 
 # Define AOIs -------------------------------------------------------------
 top1_x_topleft <- 154 - buffer
@@ -860,9 +860,8 @@ save_sumdata(df_rob_perid,      "sumdata_robustness")
 
 # Print Descriptives ----
 cat("SUMMARY\n", 
-    "[1] Accuracy. Mean:", round(mean(df_acc_pertrial$acc_visd), 2),"- Standard Deviation:", round(sd(df_acc_pertrial$acc_visd), 2), "\n",
-    "[2] Precision (RMS). Mean:", round(mean(df_precrms_pertrial$precrms_visd), 2),"- Standard Deviation:", round(sd(df_precrms_pertrial$precrms_visd), 2), "\n",
-    "[3] Precision (SD). Mean:", round(mean(df_precsd_pertrial$precsd_visd), 2), "- Standard Deviation:", round(sd(df_precsd_pertrial$precsd_visd), 2), "\n",
+    "[1] Accuracy. Mean:", round(mean(df_acc_perid$acc_visd), 2),"- Standard Deviation:", round(sd(df_acc_perid$acc_visd), 2), "\n",
+    "[2] Precision (RMS). Mean:", round(mean(df_precrms_perid$precrms_visd), 2),"- Standard Deviation:", round(sd(df_precrms_perid$precrms_visd), 2), "\n",
+    "[3] Precision (SD). Mean:", round(mean(df_precsd_perid$precsd_visd), 2), "- Standard Deviation:", round(sd(df_precsd_perid$precsd_visd), 2), "\n",
     "[4] Robustness. Mean:", round(mean(df_rob_perid$robustness_prop_2), 2), "- Standard Deviation:", round(sd(df_rob_perid$robustness_prop_2), 2), "\n")
-
 
