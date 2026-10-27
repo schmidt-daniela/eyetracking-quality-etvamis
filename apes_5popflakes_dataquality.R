@@ -45,7 +45,7 @@ study_name_2p <- case_when(
 
 presented_trials_2p <- case_when(
   study_name_2p == "rejointcomp" ~ "20",
-  study_name_2p == "facet" ~ "79 trials plus repetition trials"
+  study_name_2p == "facet" ~ "15 trials plus repetition trials"
 )
 
 study_name_5p <- "et_vamis"
