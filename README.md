@@ -58,6 +58,7 @@ et_vamis/
 ├── img/                     # Plot outputs and generated images
 ├── R/                       # Helper R scripts and functions
 ├── et_vamis_popflakes.Rproj
-├── apes_5popflakes_dataquality.R # Popflakes presented at 5 positions before data collection
-├── apes_7popflakes_dataquality.R # Popflakes presented at the 7 AOI positions during data collection
+├── apes_5popflakes_dataquality.R # Popflakes presented at 5 positions before data collection in apes
+├── apes_7popflakes_dataquality.R # Popflakes presented at the 7 AOI positions during data collection in apes
+├── human_7popflakes_dataquality.R # Popflakes presented at the 7 AOI positions during data collection in humans
 └── README.md
