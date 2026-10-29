@@ -215,66 +215,6 @@ detect_blinks_from_onset_offset <- function(
   df
 }
 
-
-# detect_blinks_from_onset <- function(
-#     df,
-#     pupil_left_col   = "Pupil.diameter.left",
-#     pupil_right_col  = "Pupil.diameter.right",
-#     onset_col_left   = "threshold_onset.left",
-#     onset_col_right  = "threshold_onset.right",
-#     onset_value      = "onset",
-#     blink_col_left   = "blink_detection.left",
-#     blink_col_right  = "blink_detection.right",
-#     blink_value      = "blink"
-# ){
-#   n <- nrow(df)
-#   if (n == 0L) {
-#     df[[blink_col_left]]  <- character(0)
-#     df[[blink_col_right]] <- character(0)
-#     return(df)
-#   }
-#   
-#   # per-eye onset flags
-#   onset_flag_left  <- !is.na(df[[onset_col_left]])  & as.character(df[[onset_col_left]])  == onset_value
-#   onset_flag_right <- !is.na(df[[onset_col_right]]) & as.character(df[[onset_col_right]]) == onset_value
-#   
-#   # run the NA-chain marking logic for a given eye, using that eye's onset flag
-#   mark_eye <- function(pupil_col, onset_flag) {
-#     na_eye <- is.na(df[[pupil_col]])
-#     mask <- rep(FALSE, n)
-#     i <- 1L
-#     while (i <= n) {
-#       if (isTRUE(onset_flag[i])) {
-#         j <- i + 1L
-#         while (j <= n && isTRUE(onset_flag[j]) && !na_eye[j]) {
-#           j <- j + 1L
-#         }
-#         if (j <= n && na_eye[j]) {
-#           k <- j
-#           while (k <= n && na_eye[k]) {
-#             mask[k] <- TRUE
-#             k <- k + 1L
-#           }
-#           i <- k
-#           next
-#         }
-#       }
-#       i <- i + 1L
-#     }
-#     mask
-#   }
-#   
-#   mask_left  <- mark_eye(pupil_left_col,  onset_flag_left)
-#   mask_right <- mark_eye(pupil_right_col, onset_flag_right)
-#   
-#   out_left  <- rep(NA_character_, n); out_left[mask_left]   <- blink_value
-#   out_right <- rep(NA_character_, n); out_right[mask_right] <- blink_value
-#   
-#   df[[blink_col_left]]  <- out_left
-#   df[[blink_col_right]] <- out_right
-#   df
-# }
-
 ## Remove Too Short / Long Blinks ----
 # Generic: filter blinks by duration in a single blink column
 filter_blinks_by_duration <- function(
