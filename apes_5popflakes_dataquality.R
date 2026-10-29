@@ -938,11 +938,14 @@ ggplot_precsd
 dev.off()
 
 # Robustness ----
-if(species %in% c("bonobos","bonobos2")){truncate <- 42739}
-if(species == "orangs"){truncate <- 32129}
-if(species == "b_chimps"){truncate <- 13698} # to make it comparable with FACET
-if(species == "a_chimps"){truncate <- 966.6} # shortest max. duration of valid data in the a-sample
-if(species == "chimps"){truncate <- 966.6} # shortest max. duration of valid data in the a- & b-sample
+# Please note, that robustness is not perfectly comparable with the 2p data,
+# because different amounts of data (i.e., when the data was truncated) entered the analysis.
+if(species == "bonobos2"){truncate <- 42748}
+if(species == "bonobos"){truncate <- 47359}
+if(species == "orangs"){truncate <- 27182}
+if(species == "b_chimps"){truncate <- 28641}
+if(species == "a_chimps"){truncate <- 966.6} 
+if(species == "chimps"){truncate <- 966.6}
 
 df_rob_tot_5p <- df |> 
   group_by(name) |> 

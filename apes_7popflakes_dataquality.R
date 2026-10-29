@@ -285,7 +285,7 @@ dev.off()
 
 # Smooth Data
 df <- df |> 
-  mutate(pupil_diameter_left = moving_average_pupil(pupil_diameter_left, n = 10))
+  mutate(pupil_diameter_left = moving_average_pupil(pupil_diameter_left, n = 10)) # n = 10, because sampling frequency was 120Hz
 
 ## Save Plot (Post Smoothing)
 png(here("img", "blink_7popflakes", paste0("blink_2_postsmooth_", species, ".png")), width = 2048, height = 1152, res = 300)
@@ -726,7 +726,7 @@ rm(df_precsd_top1, df_precsd_top2, df_precsd_top3, df_precsd_top4,
 # The values saved in truncate are the minimum "Max cum_duration overall" that is
 # shown when running the calculate_robustness_2-function.
 if(species == "bonobos"){truncate <- 95955}
-if(species == "orangs"){truncate <- 45605}
+if(species == "orangs"){truncate <- 39172}
 if(species == "b_chimps"){truncate <- 136313} 
 if(species == "a_chimps"){truncate <- 19032} 
 if(species == "chimps"){truncate <- 19032}
