@@ -725,8 +725,8 @@ rm(df_precsd_top1, df_precsd_top2, df_precsd_top3, df_precsd_top4,
 # Robustness ----
 # The values saved in truncate are the minimum "Max cum_duration overall" that is
 # shown when running the calculate_robustness_2-function.
-if(species == "bonobos"){truncate <- 58947} # min = 95955, but 58947 to make it comparable with rejoint comp
-if(species == "orangs"){truncate <- 39172} # same as rejoint comp
+if(species == "bonobos"){truncate <- 95955}
+if(species == "orangs"){truncate <- 39172}
 if(species == "b_chimps"){truncate <- 136313} 
 if(species == "a_chimps"){truncate <- 19032} 
 if(species == "chimps"){truncate <- 19032}
