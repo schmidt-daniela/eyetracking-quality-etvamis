@@ -242,7 +242,7 @@ dev.off()
 # That is, 25 gaze samples * 3.3 (300Hz)
 # In other words, n = 25 in this data (using a sampling rate of 300Hz) aligns with Michel et al. (2017)
 df <- df |> 
-  mutate(pupil_diameter_left = moving_average_pupil(pupil_diameter_left, n = 25))
+  mutate(pupil_diameter_left = moving_average_pupil(pupil_diameter_left, n = 25)) # n = 25 because sampling frequency was 300Hz
 
 ## Save Plot (Post Smoothing)
 png(here("img", "blink_7popflakes_humans", paste0("blink_2_postsmooth_", age_group, ".png")), width = 2048, height = 1152, res = 300)
