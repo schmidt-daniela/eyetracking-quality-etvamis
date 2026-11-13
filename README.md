@@ -14,7 +14,7 @@ The R scripts uploaded in this repository evaluate the eye-tracking data quality
 
 The comparison showed an overall improvement in accuracy across all tested species when using the 5-point conspecific calibration. (Note that higher values indicate a greater offset, that is, a poorer accuracy.)
 
- * **Chimpanzees (Group A):**
+* **Chimpanzees (Group A):**
   * Mean 2-point: `3.81°`
   * Mean 5-point: `3.53°`
   * **Average Improvement: 0.28°**
