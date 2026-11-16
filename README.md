@@ -12,36 +12,140 @@ The R scripts uploaded in this repository evaluate the eye-tracking data quality
 
 ## 📊 Summary of Results
 
-The comparison showed an overall improvement in accuracy across all tested species when using the 5-point conspecific calibration. (Note that higher values indicate a greater offset, that is, a poorer accuracy.)
+### Accuracy (2 vs 5 points)
+
+The descriptive comparison showed consistent improvements in accuracy (lower error/distance) across all tested species when using the 5-point calibration.
 
 * **Chimpanzees (Group A):**
-  * Mean 2-point: `3.81°`
-  * Mean 5-point: `3.53°`
-  * **Average Improvement: 0.28°**
-
+  * Mean 2-point: `3.809`
+  * Mean 5-point: `3.532`
+  * **Average Improvement: `0.278`** (SD: `1.118`)
 * **Chimpanzees (Group B):**
-  * Mean 2-point: `4.04°`
-  * Mean 5-point: `3.36°`
-  * **Average Improvement: 0.68°**
-
+  * Mean 2-point: `4.043`
+  * Mean 5-point: `3.364`
+  * **Average Improvement: `0.679`** (SD: `0.930`)
 * **Chimpanzees:**
-  * Mean 2-point: `3.87°`
-  * Mean 5-point: `3.30°`
-  * **Average Improvement: 0.38°**
-
+  * Mean 2-point: `3.872`
+  * Mean 5-point: `3.487`
+  * **Average Improvement: `0.385`** (SD: `1.055`)
 * **Bonobos:**
-  * Mean 2-point: `3.15°`
-  * Mean 5-point: `2.92°`
-  * **Average Improvement: 0.23°**
-
+  * Mean 2-point: `3.155`
+  * Mean 5-point: `2.917`
+  * **Average Improvement: `0.237`** (SD: `1.223`)
 * **Orangutans:**
-  * Mean 2-point: `3.37°`
-  * Mean 5-point: `2.53°`
-  * **Average Improvement: 0.84°**
+  * Mean 2-point: `3.365`
+  * Mean 5-point: `2.529`
+  * **Average Improvement: `0.836`** (SD: `1.845`)
+
+---
+
+### Precision (2 vs 5 points)
+
+#### RMS
+The descriptive comparison showed minimal changes in precision (RMS) across the tested species when using the 5-point calibration.
+
+* **Chimpanzees (Group A):**
+  * Mean 2-point: `0.500`
+  * Mean 5-point: `0.497`
+  * **Average Improvement: `0.003`** (SD: `0.399`)
+* **Chimpanzees (Group B):**
+  * Mean 2-point: `0.280`
+  * Mean 5-point: `0.281`
+  * **Average Improvement: `-0.001`** (SD: `0.149`)
+* **Chimpanzees:**
+  * Mean 2-point: `0.441`
+  * Mean 5-point: `0.439`
+  * **Average Improvement: `0.002`** (SD: `0.344`)
+* **Bonobos:**
+  * Mean 2-point: `0.363`
+  * Mean 5-point: `0.429`
+  * **Average Improvement: `-0.066`** (SD: `0.220`)
+* **Orangutans:**
+  * Mean 2-point: `0.217`
+  * Mean 5-point: `0.315`
+  * **Average Improvement: `-0.097`** (SD: `0.250`)
+
+#### SD
+The descriptive comparison showed minimal changes in precision (SD) across the tested species when using the 5-point calibration.
+
+* **Chimpanzees (Group A):**
+  * Mean 2-point: `0.321`
+  * Mean 5-point: `0.334`
+  * **Average Improvement: `-0.013`** (SD: `0.328`)
+* **Chimpanzees (Group B):**
+  * Mean 2-point: `0.179`
+  * Mean 5-point: `0.183`
+  * **Average Improvement: `-0.003`** (SD: `0.132`)
+* **Chimpanzees:**
+  * Mean 2-point: `0.283`
+  * Mean 5-point: `0.293`
+  * **Average Improvement: `-0.011`** (SD: `0.283`)
+* **Bonobos:**
+  * Mean 2-point: `0.249`
+  * Mean 5-point: `0.296`
+  * **Average Improvement: `-0.047`** (SD: `0.173`)
+* **Orangutans:**
+  * Mean 2-point: `0.143`
+  * Mean 5-point: `0.198`
+  * **Average Improvement: `-0.054`** (SD: `0.169`)
+
+---
+
+### Robustness (2 vs 5 points)
+
+Note that here negative values indicate an improvement in robustness and better data quality.
+
+#### MS
+The descriptive comparison showed mixed results in robustness (ms) across the tested species when using the 5-point calibration. 
+
+* **Chimpanzees (Group A):**
+  * Mean 2-point: `364.033 ms`
+  * Mean 5-point: `395.749 ms`
+  * **Average Improvement: `-31.716 ms`** (SD: `647.284 ms`)
+* **Chimpanzees (Group B):**
+  * Mean 2-point: `841.617 ms`
+  * Mean 5-point: `752.508 ms`
+  * **Average Improvement: `89.109 ms`** (SD: `400.971 ms`)
+* **Chimpanzees:**
+  * Mean 2-point: `491.389 ms`
+  * Mean 5-point: `438.361 ms`
+  * **Average Improvement: `53.027 ms`** (SD: `589.410 ms`)
+* **Bonobos:**
+  * Mean 2-point: `917.083 ms`
+  * Mean 5-point: `341.836 ms`
+  * **Average Improvement: `575.247 ms`** (SD: `970.618 ms`)
+* **Orangutans:**
+  * Mean 2-point: `698.281 ms`
+  * Mean 5-point: `702.499 ms`
+  * **Average Improvement: `-4.218 ms`** (SD: `868.977 ms`)
+
+#### PROP
+The comparison showed mixed results in robustness (proportion) across the tested species when using the 5-point calibration.
+
+* **Chimpanzees (Group A):**
+  * Mean 2-point: `0.027`
+  * Mean 5-point: `0.409`
+  * **Average Improvement: `-0.383`** (SD: `0.399`)
+* **Chimpanzees (Group B):**
+  * Mean 2-point: `0.061`
+  * Mean 5-point: `0.026`
+  * **Average Improvement: `0.035`** (SD: `0.024`)
+* **Chimpanzees:**
+  * Mean 2-point: `0.036`
+  * Mean 5-point: `0.454`
+  * **Average Improvement: `-0.418`** (SD: `0.383`)
+* **Bonobos:**
+  * Mean 2-point: `0.016`
+  * Mean 5-point: `0.006`
+  * **Average Improvement: `0.010`** (SD: `0.016`)
+* **Orangutans:**
+  * Mean 2-point: `0.026`
+  * Mean 5-point: `0.026`
+  * **Average Improvement: `0.000`** (SD: `0.032`)
 
 ## 💡 Conclusion
 
-Across all species, we observed an improvement in data quality when utilizing a 5-point calibration from a conspecific (or in few cases, an own 5-point calibration) compared to the individual's own 2-point calibration. Based on these findings, we decided to use the reviewed 5-point  calibrations for the data collection of the main research project.
+Across all species, we observed, descriptively, an improvement in accuracy (and no meaningful differences in robustness and precision overall) when utilizing a 5-point calibration from a conspecific compared to the individual's own 2-point calibration. Based on these findings, we decided to use the reviewed 5-point calibrations for the data collection of the main research project.
 
 ## 📁 Data Structure & Usage
 
