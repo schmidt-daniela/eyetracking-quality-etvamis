@@ -21,13 +21,13 @@ The descriptive comparison showed consistent improvements in accuracy (lower err
   * Mean 5-point: `3.532`
   * **Average Improvement: `0.278`** (SD: `1.118`)
 * **Chimpanzees (Group B):**
-  * Mean 2-point: `4.043`
-  * Mean 5-point: `3.364`
-  * **Average Improvement: `0.679`** (SD: `0.930`)
+  * Mean 2-point: `3.815`
+  * Mean 5-point: `3.145`
+  * **Average Improvement: `0.670`** (SD: `0.919`)
 * **Chimpanzees:**
-  * Mean 2-point: `3.872`
-  * Mean 5-point: `3.487`
-  * **Average Improvement: `0.385`** (SD: `1.055`)
+  * Mean 2-point: `3.811`
+  * Mean 5-point: `3.395`
+  * **Average Improvement: `0.416`** (SD: `1.040`)
 * **Bonobos:**
   * Mean 2-point: `3.155`
   * Mean 5-point: `2.917`
@@ -42,6 +42,7 @@ The descriptive comparison showed consistent improvements in accuracy (lower err
 ### Precision (2 vs 5 points)
 
 #### RMS
+
 The descriptive comparison showed minimal changes in precision (RMS) across the tested species when using the 5-point calibration.
 
 * **Chimpanzees (Group A):**
@@ -49,13 +50,13 @@ The descriptive comparison showed minimal changes in precision (RMS) across the 
   * Mean 5-point: `0.497`
   * **Average Improvement: `0.003`** (SD: `0.399`)
 * **Chimpanzees (Group B):**
-  * Mean 2-point: `0.280`
-  * Mean 5-point: `0.281`
-  * **Average Improvement: `-0.001`** (SD: `0.149`)
+  * Mean 2-point: `0.436`
+  * Mean 5-point: `0.396`
+  * **Average Improvement: `0.040`** (SD: `0.385`)
 * **Chimpanzees:**
-  * Mean 2-point: `0.441`
-  * Mean 5-point: `0.439`
-  * **Average Improvement: `0.002`** (SD: `0.344`)
+  * Mean 2-point: `0.477`
+  * Mean 5-point: `0.461`
+  * **Average Improvement: `0.016`** (SD: `0.382`)
 * **Bonobos:**
   * Mean 2-point: `0.363`
   * Mean 5-point: `0.429`
@@ -66,6 +67,7 @@ The descriptive comparison showed minimal changes in precision (RMS) across the 
   * **Average Improvement: `-0.097`** (SD: `0.250`)
 
 #### SD
+
 The descriptive comparison showed minimal changes in precision (SD) across the tested species when using the 5-point calibration.
 
 * **Chimpanzees (Group A):**
@@ -73,13 +75,13 @@ The descriptive comparison showed minimal changes in precision (SD) across the t
   * Mean 5-point: `0.334`
   * **Average Improvement: `-0.013`** (SD: `0.328`)
 * **Chimpanzees (Group B):**
-  * Mean 2-point: `0.179`
-  * Mean 5-point: `0.183`
-  * **Average Improvement: `-0.003`** (SD: `0.132`)
+  * Mean 2-point: `0.315`
+  * Mean 5-point: `0.285`
+  * **Average Improvement: `0.030`** (SD: `0.355`)
 * **Chimpanzees:**
-  * Mean 2-point: `0.283`
-  * Mean 5-point: `0.293`
-  * **Average Improvement: `-0.011`** (SD: `0.283`)
+  * Mean 2-point: `0.318`
+  * Mean 5-point: `0.316`
+  * **Average Improvement: `0.002`** (SD: `0.327`)
 * **Bonobos:**
   * Mean 2-point: `0.249`
   * Mean 5-point: `0.296`
@@ -96,7 +98,8 @@ The descriptive comparison showed minimal changes in precision (SD) across the t
 Note that here negative values indicate an improvement in robustness and better data quality.
 
 #### MS
-The descriptive comparison showed mixed results in robustness (ms) across the tested species when using the 5-point calibration. 
+
+The descriptive comparison showed mixed results in robustness (ms) across the tested species when using the 5-point calibration.
 
 * **Chimpanzees (Group A):**
   * Mean 2-point: `364.033 ms`
@@ -120,7 +123,8 @@ The descriptive comparison showed mixed results in robustness (ms) across the te
   * **Average Improvement: `-4.218 ms`** (SD: `868.977 ms`)
 
 #### PROP
-The comparison showed mixed results in robustness (proportion) across the tested species when using the 5-point calibration.
+
+The descriptive comparison showed mixed results in robustness (proportion) across the tested species when using the 5-point calibration.
 
 * **Chimpanzees (Group A):**
   * Mean 2-point: `0.027`
@@ -133,7 +137,7 @@ The comparison showed mixed results in robustness (proportion) across the tested
 * **Chimpanzees:**
   * Mean 2-point: `0.036`
   * Mean 5-point: `0.454`
-  * **Average Improvement: `-0.418`** (SD: `0.383`)
+  * **Average Improvement: `-0.418`** (SD: `0.363`)
 * **Bonobos:**
   * Mean 2-point: `0.016`
   * Mean 5-point: `0.006`
